@@ -1,9 +1,16 @@
 #include<LiquidCrystal.h>
 LiquidCrystal lcd(8,9,10,11,12,13);
 const int buttonPin = 2;
+const int buttonPinMaxMin = 3;
 int buttonState = 0;
+int buttonStateMaxMin = 0;
 int buttonPushCounter = 0;   
+int buttonPushCounterMaxMin = 0;   
 int lastButtonState = 0;     
+float tempMax = 0;
+float tempMin = 50;
+
+
 
 #define sensor A0
 byte degree[8] =
@@ -17,10 +24,12 @@ byte degree[8] =
 0b00000,
 0b00000
 };
+
 void setup()
 {
 pinMode(5, OUTPUT); 
 pinMode(buttonPin, INPUT);
+pinMode(buttonPinMaxMin, INPUT);
 lcd.begin(16,2);
 lcd.createChar(1, degree);
 lcd.setCursor(0,0);
@@ -30,7 +39,6 @@ lcd.print(" Thermometer ");
 delay(2000);
 lcd.clear();
 Serial.begin(9600);
-
 }
 
 void loop()
@@ -38,9 +46,21 @@ void loop()
 buttonState = digitalRead(buttonPin);
 float reading=analogRead(sensor);
 float temperature=reading*(5.0/1023.0)*100;
+delay(10); 
+
+if(temperature > tempMax){
+tempMax=temperature              //Calculated Maximum Temperature
+}
+
+if(temperature < tempMin){
+tempMin=temperature              //Calculated Minimum Temperature
+}
 
 delay(10); 
 int buttonPushCounter=counter();
+int buttonPushCounterMaxMin=maxmin();
+
+
         if (buttonPushCounter == 1)
         {  
         lcd.clear();
@@ -106,7 +126,7 @@ int buttonPushCounter=counter();
            }
             
           }
-          else {
+          else if (buttonPushCounter==4){
         lcd.clear();
         lcd.setCursor(2,0);
         lcd.print("Temperature in R");
@@ -140,7 +160,7 @@ if (buttonState == HIGH) {
       Serial.print("number of button pushes: ");
       Serial.println(buttonPushCounter);
       }{
-    if (buttonPushCounter == 4)
+    if (buttonPushCounter == 5)
     {
     buttonPushCounter = 0;     
     }  }
@@ -148,5 +168,23 @@ if (buttonState == HIGH) {
       
 }
 
+
+int maxmin(){
+if (buttonStateMaxMin == HIGH) {
+   
+ 
+   buttonPushCounterMaxMin++;
+      
+      Serial.println("maxmin");
+      Serial.print("number of button pushes: ");
+      Serial.println(buttonPushCounterMaxMin);
+      }{
+    if (buttonPushCounterMaxMin == 2)
+    {
+    buttonPushCounterMaxMin = 0;     
+    }  }
+      return buttonPushCounterMaxMin;
+      
+}
      
 
